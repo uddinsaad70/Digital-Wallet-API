@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import bcrypt from 'bcryptjs';
 
 const userSchema = new mongoose.Schema({
     name: {
@@ -20,5 +21,10 @@ const userSchema = new mongoose.Schema({
         default: 'customer'
     }
 }, { timestamps: true });
+
+// Modular Method: Check if the entered password matches the hashed password in the database
+userSchema.methods.matchPassword = async function(enteredPassword) {
+    return await bcrypt.compare(enteredPassword, this.password);
+};
 
 export default mongoose.model('User', userSchema);

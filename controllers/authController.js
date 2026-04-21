@@ -1,8 +1,9 @@
 import User from '../models/User.js';
 import Wallet from '../models/Wallet.js';
 import bcrypt from 'bcryptjs';
+import generateToken from '../utils/generateToken.js';
 
-const registerUser = async (req, res) => {
+export const registerUser = async (req, res) => {
     try {
         // 1. Extract user data from request body
         const { name, email, password } = req.body;
@@ -42,4 +43,32 @@ const registerUser = async (req, res) => {
     }
 };
 
-export { registerUser };
+export const loginUser = async (req, res) => {
+    try {
+        console.log('Login request received. Attempting to authenticate user...');
+        const { email, password } = req.body;
+
+        // 1. Find the user by email
+        const user = await User.findOne({ email });
+
+        // 2. Check if user exists AND password matches
+        if(user && await bcrypt.compare(password, user.password)) {
+            console.log(`User login successful. User ID: ${user._id}, Email: ${user.email}`);
+
+            res.status(200).json({
+                message: 'Login successful',
+                _id: user._id,
+                name: user.name,
+                email: user.email,
+                role: user.role,
+                token: generateToken(user._id)
+            });
+        } else {
+            console.warn(`Login failed for email: ${email} - Invalid credentials`);
+            res.status(401).json({ message: 'Invalid email or password' });
+        }
+    } catch (error) {
+        console.error(`Error during user login: ${error.message}`);
+        res.status(500).json({ message: 'Server error during user login' });
+    };
+};
