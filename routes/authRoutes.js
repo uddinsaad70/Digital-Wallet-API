@@ -1,5 +1,7 @@
 import express from 'express';
-import { registerUser, loginUser } from '../controllers/authController.js';
+import { registerUser, loginUser, getUserProfile } from '../controllers/authController.js';
+import { protect } from '../middlewares/authMiddleware.js';
+import { get } from 'mongoose';
 const router = express.Router();
 
 
@@ -9,8 +11,10 @@ router.post('/register', registerUser);
 
 //Route: POST /api/auth/login
 //Description: Authenticate user and return token
-console.log('Going to set up login route');
 router.post('/login', loginUser);
-console.log('Getting out of login route setup');
+
+//Protected Route: GET /api/auth/profile
+//Description: Get user profile (requires authentication)
+router.get('/profile', protect, getUserProfile);
 
 export default router;
