@@ -10,10 +10,14 @@ const productSchema = new mongoose.Schema({
         required: true,
         min: 0 
     },
-    stockQuantity: {
+    description: {
+        type: String,
+        required: true
+    },
+    stock: {
         type: Number,
         required: true,
-        min: 0 
+        default: 0
     }
 }, { timestamps: true });
 

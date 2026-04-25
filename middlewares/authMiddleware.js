@@ -27,3 +27,17 @@ export const protect = async (req, res, next) => {
         res.status(401).json({ message: 'Not authorized, no token' });
     }
 };
+
+//Admin Middleware: Checks if the logged 
+export const admin = (req, res, next) => {
+    //req.user is set by the protect middleware(Bouncer) 
+    if(req.user && req.user.role === 'admin') {
+        console.log(`Admin access granted for user ID: ${req.user._id}`);
+        next();
+    }
+    else {
+        console.warn(`Access denied: User Id ${req.user ?. email} tried to access an admin route`)
+        //  403 Forbidden means the server understands the request but refuses to authorize it
+        res.status(403).json({ message: 'Not authorized as an admin' });
+    }
+}
