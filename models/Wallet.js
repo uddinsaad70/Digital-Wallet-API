@@ -9,6 +9,10 @@ const walletSchema = new mongoose.Schema({
     balance: {
         type: Number,
         default: 0
+    },
+    currency: {
+        type: String,
+        default: 'BDT' 
     }
 }, { timestamps: true });
 

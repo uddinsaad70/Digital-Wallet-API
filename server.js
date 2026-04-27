@@ -6,6 +6,7 @@ import dotenv from 'dotenv';
 import connectDB from './config/db.js';
 import authRoutes from './routes/authRoutes.js';
 import productRoutes from './routes/productRoutes.js';
+import walletRoutes from './routes/walletRoutes.js';
 
 // 2. Initialize app and configure environment variables
 const app = express();
@@ -14,10 +15,13 @@ const app = express();
 // This line is crucial! It tells Express to parse incoming JSON data in request bodies.
 app.use(express.json());
 
+
 // 4. Routes 
 // Mount the auth routes at the /api/auth path
 app.use('/api/auth', authRoutes);
 app.use('/api/products', productRoutes);
+app.use('/api/wallet', walletRoutes);
+
 // Basic route to test if the server is running
 app.get('/', (req, res) => {
     res.send('Digital Wallet API is running !');
