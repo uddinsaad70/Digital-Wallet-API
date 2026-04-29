@@ -1,22 +1,28 @@
 import mongoose from 'mongoose';
 
 const transactionSchema = new mongoose.Schema({
-    wallet: { 
+    user: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Wallet', 
+        ref: 'User',
         required: true
     },
-    type: { 
-        type: String,
-        enum: ['deposit', 'purchase'], 
-        required: true
+    product: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Product'
     },
     amount: {
         type: Number,
         required: true
     },
-    description: { 
-        type: String 
+    type: {
+        type: String,
+        enum: ['deposit', 'purchase'],
+        required: true
+    },
+    status: {
+        type: String,
+        enum: ['success', 'failed'],
+        default: 'success'
     }
 }, { timestamps: true });
 

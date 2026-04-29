@@ -7,6 +7,7 @@ import connectDB from './config/db.js';
 import authRoutes from './routes/authRoutes.js';
 import productRoutes from './routes/productRoutes.js';
 import walletRoutes from './routes/walletRoutes.js';
+import transactionRoutes from './routes/transactionRoutes.js';
 
 // 2. Initialize app and configure environment variables
 const app = express();
@@ -21,7 +22,7 @@ app.use(express.json());
 app.use('/api/auth', authRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/wallet', walletRoutes);
-
+app.use('/api/transactions', transactionRoutes);
 // Basic route to test if the server is running
 app.get('/', (req, res) => {
     res.send('Digital Wallet API is running !');
