@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 import Product from "../models/Product.js";
 import Transaction from "../models/Transaction.js";
 import Wallet from "../models/Wallet.js";
+import User from "../models/User.js";
 
 // @desc Purchase a product
 // @route POST /api/transactions/purchase/:productId
@@ -83,5 +84,82 @@ export const getMyTransactions = async (req, res) => {
     } catch (error) {
         console.error(`Error fetching transactions: ${error.message}`);
         res.status(500).json({ message: 'Internal server error' });
+    }
+};
+
+// @desc Transfer money to another user
+// @route POST /api/transactions/transfer
+// @access Private
+export const transferMoney = async (req, res) => {
+    const session = await mongoose.startSession();
+    session.startTransaction();
+
+    try {
+        const senderId = req.user._id;
+        const { receiverEmail, amount } = req.body;
+
+        if ( amount <= 0) {
+            throw new Error('Transfer amount must be greater than zero');
+        }
+
+        // 1. Check the sender wallet and balance
+        const senderWallet = await Wallet.findOne({ user: senderId }).session(session);
+        if (!senderWallet || senderWallet.balance < amount) {
+            throw new Error('Insufficient balance to transfer');
+        }
+
+        const receiver = await User.findOne({ email: receiverEmail }).session(session);
+        if (!receiver) {
+            throw new Error('Recipient user not found');
+        }
+        // 2. sender can not transfer money to himself
+        if (senderId.toString() === receiver._id.toString()) {
+            throw new Error('You cannot transfer money to yourself');
+        }
+
+        // 3. Check the recipient wallet
+        const receiverWallet = await Wallet.findOne({ user: receiver._id }).session(session);
+        if (!receiverWallet) {
+            throw new Error('Recipient wallet not found');
+        }
+
+        // 4. Deduct the amount from sender wallet and add to receiver wallet
+        senderWallet.balance -= amount;
+        await senderWallet.save({ session });
+        receiverWallet.balance += amount;
+        await receiverWallet.save({ session });
+
+        // 5. Create transaction records for both sender and receiver
+        const senderTx = new Transaction({
+            user: senderId,
+            amount: amount,
+            type: 'transfer_out',
+            status: 'success'
+        });
+        await senderTx.save({ session });
+
+        const receiverTx = new Transaction({
+            user: receiver._id,
+            amount: amount,
+            type: 'transfer_in',
+            status: 'success'
+        });
+        await receiverTx.save({ session });
+
+        // 6. Commit the transaction if all operations are successful
+        await session.commitTransaction();
+        session.endSession();
+
+        res.status(200).json({
+            message: `Successfully transferred ${amount} to ${receiver.name} (${receiver.email})`,
+            newBalance: senderWallet.balance
+        });
+    }
+    catch (error) {
+        // 7. If any operation fails, abort the transaction and rollback all changes
+        await session.abortTransaction();
+        session.endSession();
+        console.error(`Transfer failed: ${error.message}`);
+        res.status(400).json({ message: `Transfer failed: ${error.message}` });
     }
 };

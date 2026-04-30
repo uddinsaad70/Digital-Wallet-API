@@ -16,7 +16,7 @@ const transactionSchema = new mongoose.Schema({
     },
     type: {
         type: String,
-        enum: ['deposit', 'purchase'],
+        enum: ['deposit', 'purchase', 'transfer_in', 'transfer_out'],
         required: true
     },
     status: {

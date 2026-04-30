@@ -29,3 +29,5 @@
   _(Must provide Token in the Headers. Replace :productId at the end of the URL with the actual ID)_
 - **Get My Transactions:** `GET http://localhost:3000/api/transactions`
   _(Must provide Token in the Headers)_
+- **Transfer Money:** `POST http://localhost:3000/api/transactions/transfer`
+  _(Must provide Token in the Headers. Body must contain receiverEmail and amount)_
