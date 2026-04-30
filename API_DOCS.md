@@ -27,3 +27,5 @@
 
 - **Purchase Product:** `POST http://localhost:3000/api/transactions/purchase/:productId`
   _(Must provide Token in the Headers. Replace :productId at the end of the URL with the actual ID)_
+- **Get My Transactions:** `GET http://localhost:3000/api/transactions`
+  _(Must provide Token in the Headers)_

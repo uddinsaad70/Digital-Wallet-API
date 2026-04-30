@@ -37,13 +37,14 @@ export const purchaseProduct = async (req, res) => {
         product.stock -= 1;
         await product.save({ session });
         // 6. transaction history record
-        const transaction = new Transaction([{
+        const transaction = await Transaction.create([{
             user: userId,
             product: productId,
             amount: product.price,
             type: 'purchase',
             status: 'success' 
-        }], {session} )
+        }], {session} );
+
 
         // 7. confirm the transaction if all operations are successful
         await session.commitTransaction();
@@ -62,5 +63,25 @@ export const purchaseProduct = async (req, res) => {
 
         console.error(`Purchase failed: ${error.message}`);
         res.status(400).json({ message: `Purchase failed: ${error.message}` });
+    }
+};
+
+// @desc Get logged in user's transaction history
+// @route GET /api/transactions
+// @access Private
+
+export const getMyTransactions = async (req, res) => {
+    try {
+        const transactions = await Transaction.find({ user: req.user._id })
+            .populate('product', 'name price')
+            .sort({ createdAt: -1 });
+        
+        res.status(200).json({
+            count: transactions.length,
+            transactions
+        });
+    } catch (error) {
+        console.error(`Error fetching transactions: ${error.message}`);
+        res.status(500).json({ message: 'Internal server error' });
     }
 };
